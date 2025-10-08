@@ -162,7 +162,7 @@
         .main-content {
             flex: 1;
             margin-left: 280px;
-            padding: 40px;
+            padding: 40px 20px;
             transition: margin-left 0.3s ease;
         }
 
@@ -171,20 +171,28 @@
         }
 
         .hero-section {
-            text-align: center;
             margin-bottom: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 40px;
+            max-width: 1200px;
+            margin-left: 40px;
+            margin-right: auto;
+            padding: 0 20px;
         }
 
         .logo-container {
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 30px;
+            width: 180px;
+            height: 180px;
             background: radial-gradient(circle, rgba(0, 200, 255, 0.3) 0%, transparent 70%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             animation: glow 3s ease-in-out infinite;
+            flex-shrink: 0;
+            margin-left: 0;
         }
 
         @keyframes glow {
@@ -193,26 +201,33 @@
         }
 
         .logo {
-            width: 120px;
-            height: 120px;
+            width: 150px;
+            height: 150px;
             filter: drop-shadow(0 0 20px rgba(0, 200, 255, 0.5));
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .hero-content {
+            text-align: left;
+            flex: 1;
         }
 
         h1 {
-            font-size: 3em;
+            font-size: 2.5em;
             background: linear-gradient(135deg, #00c8ff 0%, #0080ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            font-weight: 700;
         }
 
         .description {
-            font-size: 1.3em;
-            color: #a0b0d0;
-            margin-bottom: 40px;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
+            font-size: 1.4em;
+            color: #b0c0e0;
+            margin-bottom: 0;
+            line-height: 1.8;
+            font-weight: 400;
         }
 
         /* Stats Grid */
@@ -400,6 +415,15 @@
                 margin-left: 0;
             }
 
+            .hero-section {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .hero-content {
+                text-align: center;
+            }
+
             .stats-grid {
                 grid-template-columns: 1fr;
             }
@@ -462,10 +486,12 @@
             <div id="homePage">
                 <div class="hero-section">
                     <div class="logo-container">
-                        <img src="https://cdn.discordapp.com/attachments/1367007738151964717/1422403561794572338/84d4d06d3688aae918a95df4eaec0136.webp?ex=68e66f4c&is=68e51dcc&hm=e0bd6ff662fdab948bced38bc552eafef084432149fb120a1543422c620e1415&" alt="Music Bot Logo" class="logo">
+                        <img src="https://cdn.discordapp.com/attachments/1367007738151964717/1411958575777054761/Picsart_25-08-27_18-59-17-276.png?ex=68e6ab25&is=68e559a5&hm=db7e4d10adc35517129b27e22a7f960606fdb7967f220ada2dd0f8fa2bf227c3&" alt="Fynex Logo" class="logo">
                     </div>
-                    <h1>Premium Music Bot</h1>
-                    <p class="description">Experience high-quality music streaming with advanced features, filters, and playlist management. Your ultimate Discord music companion!</p>
+                    <div class="hero-content">
+                        <h1>Fynex Music Bot</h1>
+                        <p class="description">Fynex is a High quality music bot which comes with amazing commands and features for the best music experience on Discord!</p>
+                    </div>
                 </div>
 
                 <div class="stats-grid">
