@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Bot Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(15, 20, 40, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            border-right: 1px solid rgba(0, 200, 255, 0.1);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            transform: translateX(-100%);
+        }
+
+        .sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #00c8ff 0%, #0080ff 100%);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            display: none;
+            transition: transform 0.2s;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .back-btn.show {
+            display: block;
+        }
+
+        .menu-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(0, 200, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-item:hover {
+            background: rgba(0, 200, 255, 0.15);
+            border-color: rgba(0, 200, 255, 0.3);
+            transform: translateX(5px);
+        }
+
+        .menu-item.active {
+            background: linear-gradient(135deg, rgba(0, 200, 255, 0.2) 0%, rgba(0, 128, 255, 0.2) 100%);
+            border-color: #00c8ff;
+        }
+
+        .arrow {
+            transition: transform 0.3s;
+        }
+
+        .arrow.rotated {
+            transform: rotate(180deg);
+        }
+
+        .submenu {
+            display: none;
+            padding-left: 15px;
+            margin-top: 5px;
+        }
+
+        .submenu.show {
+            display: block;
+        }
+
+        .submenu-item {
+            padding: 12px;
+            margin: 5px 0;
+            background: rgba(0, 200, 255, 0.03);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 2px solid transparent;
+        }
+
+        .submenu-item:hover {
+            background: rgba(0, 200, 255, 0.1);
+            border-left-color: #00c8ff;
+            transform: translateX(3px);
+        }
+
+        .invite-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #00c8ff 0%, #0080ff 100%);
+            border: none;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 200, 255, 0.4);
+        }
+
+        .invite-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 200, 255, 0.6);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 40px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .main-content.full {
+            margin-left: 0;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 30px;
+            background: radial-gradient(circle, rgba(0, 200, 255, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 30px rgba(0, 200, 255, 0.3); }
+            50% { box-shadow: 0 0 50px rgba(0, 200, 255, 0.6); }
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            filter: drop-shadow(0 0 20px rgba(0, 200, 255, 0.5));
+        }
+
+        h1 {
+            font-size: 3em;
+            background: linear-gradient(135deg, #00c8ff 0%, #0080ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+        }
+
+        .description {
+            font-size: 1.3em;
+            color: #a0b0d0;
+            margin-bottom: 40px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto 50px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(0, 200, 255, 0.1) 0%, rgba(0, 128, 255, 0.1) 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 200, 255, 0.2);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 200, 255, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #7080a0;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00c8ff 0%, #0080ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Commands Section */
+        .commands-section {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(0, 200, 255, 0.05);
+            border: 1px solid rgba(0, 200, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+        }
+
+        .search-bar:focus {
+            outline: none;
+            border-color: #00c8ff;
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.3);
+        }
+
+        .search-bar::placeholder {
+            color: #7080a0;
+        }
+
+        .category-section {
+            margin-bottom: 40px;
+        }
+
+        .category-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #00c8ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .category-title::before {
+            content: '';
+            width: 4px;
+            height: 30px;
+            background: linear-gradient(135deg, #00c8ff 0%, #0080ff 100%);
+            border-radius: 2px;
+        }
+
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .command-card {
+            background: rgba(0, 200, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 200, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .command-card:hover {
+            background: rgba(0, 200, 255, 0.1);
+            border-color: rgba(0, 200, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .command-name {
+            font-size: 1.2em;
+            color: #00c8ff;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .command-description {
+            color: #a0b0d0;
+            line-height: 1.6;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        /* Menu Toggle Button */
+        .menu-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: linear-gradient(135deg, #00c8ff 0%, #0080ff 100%);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 200, 255, 0.4);
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 200, 255, 0.6);
+        }
+
+        .menu-toggle.hide {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.8);
+        }
+
+        .menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    
+    <!-- Menu Toggle Button -->
+    <button class="menu-toggle" id="menuToggle">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <button class="back-btn" id="backBtn">← Back</button>
+            </div>
+            
+            <div class="menu-item" data-page="home">
+                <span>🏠 Home</span>
+            </div>
+            
+            <div class="menu-item" data-page="all-commands">
+                <span>📜 All Commands</span>
+            </div>
+            
+            <div class="menu-item" id="categoryToggle">
+                <span>📁 Categories</span>
+                <span class="arrow">↓</span>
+            </div>
+            
+            <div class="submenu" id="submenu">
+                <div class="submenu-item" data-category="music">🎵 Music</div>
+                <div class="submenu-item" data-category="filter">🎚️ Filter</div>
+                <div class="submenu-item" data-category="spotify">🎧 Spotify</div>
+                <div class="submenu-item" data-category="playlist">📝 Playlist</div>
+                <div class="submenu-item" data-category="config">⚙️ Config</div>
+                <div class="submenu-item" data-category="favourite">⭐ Favourite</div>
+                <div class="submenu-item" data-category="utility">🔧 Utility</div>
+                <div class="submenu-item" data-category="premium">💎 Premium</div>
+                <div class="submenu-item" data-category="info">ℹ️ Info</div>
+            </div>
+
+            <button class="invite-btn" id="inviteBtn">🎵 Invite Bot</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content" id="mainContent">
+            <!-- Home Page -->
+            <div id="homePage">
+                <div class="hero-section">
+                    <div class="logo-container">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2300c8ff;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%230080ff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M50 60 L50 140 L70 160 L70 80 L130 80 L130 60 Z M130 100 L170 140 L170 100 Z' fill='url(%23grad)'/%3E%3C/svg%3E" alt="Music Bot Logo" class="logo">
+                    </div>
+                    <h1>Premium Music Bot</h1>
+                    <p class="description">Experience high-quality music streaming with advanced features, filters, and playlist management. Your ultimate Discord music companion!</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Servers</div>
+                        <div class="stat-value" id="servers">60</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active Users</div>
+                        <div class="stat-value" id="users">19K</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Uptime</div>
+                        <div class="stat-value" id="uptime">10d</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Ping</div>
+                        <div class="stat-value" id="ping">15ms</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Commands Section -->
+            <div id="commandsPage" style="display: none;">
+                <input type="text" class="search-bar" id="searchBar" placeholder="Search commands...">
+                <div id="commandsContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const commands = {
+            music: [
+                { name: '/play', description: 'Play a song from YouTube, Spotify, or other sources' },
+                { name: '/pause', description: 'Pause the currently playing song' },
+                { name: '/resume', description: 'Resume the paused song' },
+                { name: '/skip', description: 'Skip to the next song in queue' },
+                { name: '/stop', description: 'Stop playing and clear the queue' },
+                { name: '/queue', description: 'Display the current song queue' },
+                { name: '/nowplaying', description: 'Show currently playing song information' },
+                { name: '/volume', description: 'Adjust the playback volume (0-100)' },
+                { name: '/loop', description: 'Toggle loop mode for current song or queue' },
+                { name: '/shuffle', description: 'Shuffle the current queue' }
+            ],
+            filter: [
+                { name: '/bassboost', description: 'Apply bass boost effect to audio' },
+                { name: '/nightcore', description: 'Apply nightcore effect (speed up + pitch up)' },
+                { name: '/vaporwave', description: 'Apply vaporwave effect (slow down)' },
+                { name: '/8d', description: 'Enable 8D audio effect' },
+                { name: '/karaoke', description: 'Remove vocals for karaoke mode' },
+                { name: '/tremolo', description: 'Apply tremolo effect' },
+                { name: '/vibrato', description: 'Apply vibrato effect' },
+                { name: '/resetfilter', description: 'Remove all applied filters' }
+            ],
+            spotify: [
+                { name: '/spotify', description: 'Play songs directly from Spotify' },
+                { name: '/spotifyplaylist', description: 'Play entire Spotify playlist' },
+                { name: '/spotifyalbum', description: 'Play Spotify album' },
+                { name: '/spotifyartist', description: 'Play top tracks from Spotify artist' }
+            ],
+            playlist: [
+                { name: '/playlist create', description: 'Create a new custom playlist' },
+                { name: '/playlist add', description: 'Add current song to playlist' },
+                { name: '/playlist remove', description: 'Remove song from playlist' },
+                { name: '/playlist play', description: 'Play your saved playlist' },
+                { name: '/playlist list', description: 'Show all your playlists' },
+                { name: '/playlist delete', description: 'Delete a playlist' }
+            ],
+            config: [
+                { name: '/setprefix', description: 'Change bot command prefix' },
+                { name: '/setdj', description: 'Set DJ role for music controls' },
+                { name: '/announce', description: 'Toggle song announcement messages' },
+                { name: '/247', description: 'Enable 24/7 mode (stay in voice channel)' },
+                { name: '/language', description: 'Change bot language' }
+            ],
+            favourite: [
+                { name: '/favorite add', description: 'Add current song to favorites' },
+                { name: '/favorite list', description: 'Show your favorite songs' },
+                { name: '/favorite play', description: 'Play your favorite songs' },
+                { name: '/favorite remove', description: 'Remove song from favorites' }
+            ],
+            utility: [
+                { name: '/lyrics', description: 'Get lyrics of current or specified song' },
+                { name: '/seek', description: 'Jump to specific timestamp in song' },
+                { name: '/forward', description: 'Fast forward by specified seconds' },
+                { name: '/rewind', description: 'Rewind by specified seconds' },
+                { name: '/previous', description: 'Play previous song' },
+                { name: '/move', description: 'Move a song to different position in queue' }
+            ],
+            premium: [
+                { name: '/premium status', description: 'Check your premium subscription status' },
+                { name: '/premium activate', description: 'Activate premium features' },
+                { name: '/premium features', description: 'View all premium features' }
+            ],
+            info: [
+                { name: '/help', description: 'Display help menu with all commands' },
+                { name: '/invite', description: 'Get bot invite link' },
+                { name: '/stats', description: 'Show bot statistics' },
+                { name: '/ping', description: 'Check bot latency' },
+                { name: '/support', description: 'Get support server invite link' }
+            ]
+        };
+
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const mainContent = document.getElementById('mainContent');
+        const categoryToggle = document.getElementById('categoryToggle');
+        const submenu = document.getElementById('submenu');
+        const arrow = categoryToggle.querySelector('.arrow');
+        const backBtn = document.getElementById('backBtn');
+        const homePage = document.getElementById('homePage');
+        const commandsPage = document.getElementById('commandsPage');
+        const searchBar = document.getElementById('searchBar');
+        const commandsContainer = document.getElementById('commandsContainer');
+        const menuToggle = document.getElementById('menuToggle');
+        const inviteBtn = document.getElementById('inviteBtn');
+
+        let currentView = 'home';
+
+        // Toggle sidebar with menu button
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = sidebar.classList.contains('show');
+            
+            if (isOpen) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+                menuToggle.classList.remove('hide');
+            } else {
+                sidebar.classList.add('show');
+                overlay.classList.add('show');
+                menuToggle.classList.add('hide');
+            }
+        });
+
+        // Invite button
+        inviteBtn.addEventListener('click', () => {
+            window.open('https://discord.com/oauth2/authorize?client_id=YOUR_BOT_ID&permissions=8&scope=bot%20applications.commands', '_blank');
+        });
+
+        // Toggle submenu
+        categoryToggle.addEventListener('click', () => {
+            submenu.classList.toggle('show');
+            arrow.classList.toggle('rotated');
+        });
+
+        // Handle menu clicks
+        document.querySelectorAll('.menu-item[data-page]').forEach(item => {
+            item.addEventListener('click', () => {
+                const page = item.dataset.page;
+                if (page === 'home') {
+                    showHome();
+                } else if (page === 'all-commands') {
+                    showAllCommands();
+                }
+            });
+        });
+
+        // Handle submenu clicks
+        document.querySelectorAll('.submenu-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const category = item.dataset.category;
+                showCategory(category);
+            });
+        });
+
+        // Back button
+        backBtn.addEventListener('click', () => {
+            showHome();
+        });
+
+        // Click outside sidebar
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+            menuToggle.classList.remove('hide');
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target) && sidebar.classList.contains('show')) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+                menuToggle.classList.remove('hide');
+            }
+        });
+
+        // Search functionality
+        searchBar.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            filterCommands(query);
+        });
+
+        function showHome() {
+            homePage.style.display = 'block';
+            commandsPage.style.display = 'none';
+            backBtn.classList.remove('show');
+            currentView = 'home';
+            overlay.classList.remove('show');
+        }
+
+        function showAllCommands() {
+            homePage.style.display = 'none';
+            commandsPage.style.display = 'block';
+            backBtn.classList.add('show');
+            currentView = 'all-commands';
+            
+            let html = '';
+            for (const [category, cmds] of Object.entries(commands)) {
+                html += `
+                    <div class="category-section">
+                        <h2 class="category-title">${capitalizeFirst(category)}</h2>
+                        <div class="commands-grid">
+                            ${cmds.map(cmd => `
+                                <div class="command-card">
+                                    <div class="command-name">${cmd.name}</div>
+                                    <div class="command-description">${cmd.description}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            commandsContainer.innerHTML = html;
+            overlay.classList.remove('show');
+        }
+
+        function showCategory(category) {
+            homePage.style.display = 'none';
+            commandsPage.style.display = 'block';
+            backBtn.classList.add('show');
+            currentView = category;
+            
+            const cmds = commands[category];
+            let html = `
+                <div class="category-section">
+                    <h2 class="category-title">${capitalizeFirst(category)}</h2>
+                    <div class="commands-grid">
+                        ${cmds.map(cmd => `
+                            <div class="command-card">
+                                <div class="command-name">${cmd.name}</div>
+                                <div class="command-description">${cmd.description}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            commandsContainer.innerHTML = html;
+            overlay.classList.remove('show');
+        }
+
+        function filterCommands(query) {
+            if (!query) {
+                if (currentView === 'all-commands') {
+                    showAllCommands();
+                } else if (currentView !== 'home') {
+                    showCategory(currentView);
+                }
+                return;
+            }
+
+            let html = '';
+            let found = false;
+
+            for (const [category, cmds] of Object.entries(commands)) {
+                const filtered = cmds.filter(cmd => 
+                    cmd.name.toLowerCase().includes(query) || 
+                    cmd.description.toLowerCase().includes(query)
+                );
+
+                if (filtered.length > 0) {
+                    found = true;
+                    html += `
+                        <div class="category-section">
+                            <h2 class="category-title">${capitalizeFirst(category)}</h2>
+                            <div class="commands-grid">
+                                ${filtered.map(cmd => `
+                                    <div class="command-card">
+                                        <div class="command-name">${cmd.name}</div>
+                                        <div class="command-description">${cmd.description}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            if (!found) {
+                html = '<p style="text-align: center; color: #7080a0; margin-top: 50px;">No commands found</p>';
+            }
+
+            commandsContainer.innerHTML = html;
+        }
+
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        // Animate stats on load
+        function animateValue(id, start, end, duration, suffix = '') {
+            const obj = document.getElementById(id);
+            const range = end - start;
+            const increment = end > start ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                obj.textContent = current.toLocaleString() + suffix;
+                if (current === end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+
+        // Simulate real-time stats
+        window.addEventListener('load', () => {
+            animateValue('servers', 0, 60, 1000);
+            
+            // For users, animate without K
+            const usersObj = document.getElementById('users');
+            let currentUsers = 0;
+            const targetUsers = 19;
+            const usersTimer = setInterval(() => {
+                currentUsers++;
+                usersObj.textContent = currentUsers + 'K';
+                if (currentUsers === targetUsers) {
+                    clearInterval(usersTimer);
+                }
+            }, 50);
+            
+            // For uptime
+            const uptimeObj = document.getElementById('uptime');
+            let currentUptime = 0;
+            const targetUptime = 10;
+            const uptimeTimer = setInterval(() => {
+                currentUptime++;
+                uptimeObj.textContent = currentUptime + 'd';
+                if (currentUptime === targetUptime) {
+                    clearInterval(uptimeTimer);
+                }
+            }, 100);
+            
+            animateValue('ping', 0, 15, 1000, 'ms');
+        });
+    </script>
+</body>
+</html>
