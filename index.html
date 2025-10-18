@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Bot Dashboard</title>
+    <title>Fynex Music Bot</title>
     <style>
         * {
             margin: 0;
@@ -16,249 +16,348 @@
             background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
             color: #fff;
             min-height: 100vh;
-            overflow-x: hidden;
+            padding-bottom: 120px;
         }
 
-        .container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
-            background: rgba(15, 20, 40, 0.9);
+        .navbar {
+            background: rgba(15, 20, 40, 0.95);
             backdrop-filter: blur(10px);
-            padding: 20px;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            border-right: 1px solid rgba(0, 200, 255, 0.1);
-            transition: transform 0.3s ease;
-            z-index: 1000;
-            transform: translateX(-100%);
+            border-bottom: 1px solid rgba(0, 200, 255, 0.1);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-radius: 0 0 20px 20px;
+            margin: 10px;
         }
 
-        .sidebar.show {
-            transform: translateX(0);
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            background: rgba(0, 200, 255, 0.05);
+            padding: 10px 30px;
+            border-radius: 50px;
+            border: 1px solid rgba(0, 200, 255, 0.2);
+        }
+
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: #7080a0;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #00c8ff;
+        }
+
+        .menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: #00c8ff;
+            font-size: 1.5em;
+            cursor: pointer;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .menu-btn span {
+            width: 25px;
+            height: 2px;
+            background: #00c8ff;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: -300px;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(15, 20, 40, 0.95);
+            border-right: 1px solid rgba(0, 200, 255, 0.1);
+            padding: 20px;
+            transition: left 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .sidebar.active {
+            left: 0;
         }
 
         .sidebar-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
             border-bottom: 1px solid rgba(0, 200, 255, 0.2);
         }
 
-        .sidebar-title {
-            font-size: 18px;
-            font-weight: 600;
+        .close-btn {
+            background: none;
+            border: none;
             color: #00c8ff;
+            font-size: 1.5em;
+            cursor: pointer;
         }
 
-        .back-btn {
-            background: rgba(0, 200, 255, 0.2);
-            border: 1px solid rgba(0, 200, 255, 0.3);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
+        .sidebar-links {
             display: flex;
-            align-items: center;
-            gap: 5px;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .back-btn:hover {
-            background: rgba(0, 200, 255, 0.3);
-            transform: translateX(-3px);
-        }
-
-        .menu-item {
-            padding: 15px;
-            margin: 10px 0;
+        .sidebar-link {
+            padding: 12px 15px;
+            border-radius: 8px;
             background: rgba(0, 200, 255, 0.05);
-            border-radius: 10px;
+            color: #7080a0;
             cursor: pointer;
             transition: all 0.3s;
-            border: 1px solid transparent;
+            font-weight: 600;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border: none;
+            width: 100%;
+            text-align: left;
         }
 
-        .menu-item:hover {
+        .sidebar-link:hover {
             background: rgba(0, 200, 255, 0.15);
-            border-color: rgba(0, 200, 255, 0.3);
-            transform: translateX(5px);
+            color: #00c8ff;
         }
 
-        .menu-item.active {
-            background: linear-gradient(135deg, rgba(0, 200, 255, 0.2) 0%, rgba(0, 128, 255, 0.2) 100%);
-            border-color: #00c8ff;
-        }
-
-        .arrow {
+        .sidebar-link.expandable::after {
+            content: '↓';
             transition: transform 0.3s;
         }
 
-        .arrow.rotated {
+        .sidebar-link.expandable.expanded::after {
             transform: rotate(180deg);
         }
 
         .submenu {
             display: none;
-            padding-left: 15px;
-            margin-top: 5px;
+            flex-direction: column;
+            gap: 8px;
+            margin: 10px 0 10px 15px;
+            padding-left: 10px;
+            border-left: 2px solid rgba(0, 200, 255, 0.2);
         }
 
         .submenu.show {
-            display: block;
+            display: flex;
         }
 
         .submenu-item {
-            padding: 12px;
-            margin: 5px 0;
-            background: rgba(0, 200, 255, 0.03);
-            border-radius: 8px;
+            padding: 10px 12px;
+            background: rgba(0, 200, 255, 0.08);
+            border-radius: 6px;
+            color: #7080a0;
             cursor: pointer;
             transition: all 0.3s;
-            border-left: 2px solid transparent;
+            font-size: 0.9em;
+            font-weight: 500;
         }
 
         .submenu-item:hover {
-            background: rgba(0, 200, 255, 0.1);
-            border-left-color: #00c8ff;
-            transform: translateX(3px);
+            background: rgba(0, 200, 255, 0.15);
+            color: #00c8ff;
         }
 
-        .invite-btn {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #00c8ff 0%, #0080ff 100%);
-            border: none;
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(0, 200, 255, 0.4);
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
         }
 
-        .invite-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 200, 255, 0.6);
+        .overlay.active {
+            display: block;
         }
 
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            margin-left: 280px;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 40px 20px;
-            transition: margin-left 0.3s ease;
         }
 
-        .main-content.full {
-            margin-left: 0;
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
         }
 
         .hero-section {
-            margin-bottom: 50px;
+            display: flex;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .profile-card {
+            background: rgba(15, 20, 40, 0.6);
+            border-radius: 20px;
+            padding: 15px;
+            border: 1px solid rgba(0, 200, 255, 0.2);
+            flex-shrink: 0;
+            min-width: 280px;
+        }
+
+        .logo-title-row {
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            gap: 40px;
-            max-width: 1200px;
-            margin-left: 40px;
-            margin-right: auto;
-            padding: 0 20px;
+            gap: 15px;
         }
 
         .logo-container {
-            width: 180px;
-            height: 180px;
-            background: radial-gradient(circle, rgba(0, 200, 255, 0.3) 0%, transparent 70%);
-            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            background: rgba(10, 15, 30, 0.8);
+            border-radius: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: glow 3s ease-in-out infinite;
-            flex-shrink: 0;
-            margin-left: 0;
-        }
-
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 30px rgba(0, 200, 255, 0.3); }
-            50% { box-shadow: 0 0 50px rgba(0, 200, 255, 0.6); }
+            border: 2px solid rgba(0, 200, 255, 0.3);
         }
 
         .logo {
-            width: 150px;
-            height: 150px;
-            filter: drop-shadow(0 0 20px rgba(0, 200, 255, 0.5));
-            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
             object-fit: cover;
         }
 
-        .hero-content {
-            text-align: left;
-            flex: 1;
-        }
-
         h1 {
-            font-size: 2.5em;
+            font-size: 2em;
             background: linear-gradient(135deg, #00c8ff 0%, #0080ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
+            margin: 0;
             font-weight: 700;
         }
 
+        .subtitle {
+            font-size: 0.95em;
+            color: #7080a0;
+            margin: 0;
+        }
+
+        .intro-card {
+            background: rgba(15, 20, 40, 0.6);
+            border-radius: 20px;
+            padding: 25px;
+            border: 1px solid rgba(0, 200, 255, 0.2);
+            flex: 1;
+        }
+
+        .intro-title {
+            font-size: 1.8em;
+            color: #fff;
+            margin-bottom: 15px;
+            font-weight: 600;
+            border-bottom: 3px solid #00c8ff;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
         .description {
-            font-size: 1.4em;
             color: #b0c0e0;
-            margin-bottom: 0;
-            line-height: 1.8;
-            font-weight: 400;
+            margin-bottom: 15px;
+            line-height: 1.7;
+            text-align: justify;
         }
 
-        /* Stats Grid */
-        .stats-grid {
+        .features-section {
+            margin-bottom: 50px;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #fff;
+            margin-bottom: 25px;
+            font-weight: 600;
+            border-bottom: 3px solid #00c8ff;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        .features-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(2, 1fr);
+            grid-template-columns: 1fr;
             gap: 20px;
-            max-width: 800px;
-            margin: 0 auto 50px;
         }
 
-        .stat-card {
-            background: linear-gradient(135deg, rgba(0, 200, 255, 0.1) 0%, rgba(0, 128, 255, 0.1) 100%);
-            padding: 30px;
+        .feature-item {
+            background: rgba(0, 200, 255, 0.05);
+            padding: 25px;
             border-radius: 15px;
             border: 1px solid rgba(0, 200, 255, 0.2);
             transition: all 0.3s;
         }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 200, 255, 0.3);
+        .feature-item:hover {
+            background: rgba(0, 200, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+        }
+
+        .feature-icon {
+            font-size: 2.5em;
+        }
+
+        .feature-name {
+            font-size: 1.3em;
+            color: #00c8ff;
+            font-weight: 600;
+        }
+
+        .feature-desc {
+            color: #a0b0d0;
+            line-height: 1.6;
+            margin-left: 65px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(0, 200, 255, 0.1) 0%, rgba(0, 128, 255, 0.1) 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 200, 255, 0.2);
+            text-align: center;
         }
 
         .stat-label {
-            font-size: 0.9em;
             color: #7080a0;
-            margin-bottom: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-bottom: 10px;
         }
 
         .stat-value {
@@ -269,12 +368,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* Commands Section */
-        .commands-section {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
         .search-bar {
             width: 100%;
             padding: 15px 20px;
@@ -282,45 +375,18 @@
             border: 1px solid rgba(0, 200, 255, 0.2);
             border-radius: 10px;
             color: white;
-            font-size: 16px;
             margin-bottom: 30px;
-            transition: all 0.3s;
+            font-size: 16px;
         }
 
         .search-bar:focus {
             outline: none;
             border-color: #00c8ff;
-            box-shadow: 0 0 20px rgba(0, 200, 255, 0.3);
-        }
-
-        .search-bar::placeholder {
-            color: #7080a0;
-        }
-
-        .category-section {
-            margin-bottom: 40px;
-        }
-
-        .category-title {
-            font-size: 1.8em;
-            margin-bottom: 20px;
-            color: #00c8ff;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .category-title::before {
-            content: '';
-            width: 4px;
-            height: 30px;
-            background: linear-gradient(135deg, #00c8ff 0%, #0080ff 100%);
-            border-radius: 2px;
         }
 
         .commands-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 20px;
         }
 
@@ -334,512 +400,403 @@
 
         .command-card:hover {
             background: rgba(0, 200, 255, 0.1);
-            border-color: rgba(0, 200, 255, 0.3);
             transform: translateY(-3px);
         }
 
         .command-name {
-            font-size: 1.2em;
+            font-size: 1.1em;
             color: #00c8ff;
             margin-bottom: 10px;
             font-weight: 600;
         }
 
-        .command-description {
+        .command-desc {
             color: #a0b0d0;
             line-height: 1.6;
+            font-size: 0.9em;
         }
 
-        .overlay {
+        .category-title {
+            font-size: 2em;
+            color: #00c8ff;
+            margin-bottom: 30px;
+        }
+
+        .bottom-nav {
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            z-index: 999;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 20, 40, 0.95);
+            border: 1px solid rgba(0, 200, 255, 0.1);
+            padding: 15px 20px;
+            display: flex;
+            gap: 30px;
+            border-radius: 50px;
+            z-index: 100;
+            transition: opacity 0.3s;
         }
 
-        .overlay.show {
-            display: block;
+        .bottom-nav.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
 
-        /* Menu Toggle Button */
-        .menu-toggle {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1001;
-            background: linear-gradient(135deg, #00c8ff 0%, #0080ff 100%);
-            border: none;
-            color: white;
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            cursor: pointer;
+        .bottom-link {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             gap: 5px;
+            color: #7080a0;
+            cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(0, 200, 255, 0.4);
+            font-weight: 600;
+            font-size: 0.9em;
+            text-decoration: none;
         }
 
-        .menu-toggle:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0, 200, 255, 0.6);
+        .bottom-link:hover {
+            color: #00c8ff;
         }
 
-        .menu-toggle.hide {
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(0.8);
+        .bottom-icon {
+            font-size: 1.3em;
         }
 
-        .menu-toggle span {
-            width: 25px;
-            height: 3px;
-            background: white;
-            border-radius: 2px;
-            transition: all 0.3s;
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #7080a0;
+            margin-top: 50px;
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
+            .menu-btn {
+                display: flex;
             }
-            
-            .main-content {
-                margin-left: 0;
+            .nav-links {
+                display: none;
             }
-
             .hero-section {
                 flex-direction: column;
-                text-align: center;
-            }
-
-            .hero-content {
-                text-align: center;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            h1 {
-                font-size: 2em;
             }
         }
     </style>
 </head>
 <body>
-    <div class="overlay" id="overlay"></div>
-    
-    <!-- Menu Toggle Button -->
-    <button class="menu-toggle" id="menuToggle">
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
-    
-    <div class="container">
-        <!-- Sidebar -->
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <span class="sidebar-title">Menu</span>
-                <button class="back-btn" id="backBtn">← Back</button>
-            </div>
-            
-            <div class="menu-item" data-page="home">
-                <span>🏠 Home</span>
-            </div>
-            
-            <div class="menu-item" data-page="all-commands">
-                <span>📜 All Commands</span>
-            </div>
-            
-            <div class="menu-item" id="categoryToggle">
-                <span>📁 Categories</span>
-                <span class="arrow">↓</span>
-            </div>
-            
-            <div class="submenu" id="submenu">
-                <div class="submenu-item" data-category="music">🎵 Music</div>
-                <div class="submenu-item" data-category="filter">🎚️ Filter</div>
-                <div class="submenu-item" data-category="spotify">🎧 Spotify</div>
-                <div class="submenu-item" data-category="playlist">📝 Playlist</div>
-                <div class="submenu-item" data-category="config">⚙️ Config</div>
-                <div class="submenu-item" data-category="favourite">⭐ Favourite</div>
-                <div class="submenu-item" data-category="utility">🔧 Utility</div>
-                <div class="submenu-item" data-category="premium">💎 Premium</div>
-                <div class="submenu-item" data-category="info">ℹ️ Info</div>
-            </div>
-
-            <button class="invite-btn" id="inviteBtn">🎵 Invite Bot</button>
+    <!-- Navbar -->
+    <div class="navbar">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span style="font-size: 1.5em;">🎵</span>
+            <span style="font-size: 1.2em; font-weight: 700; color: #00c8ff;">Fynex</span>
         </div>
+        <div class="nav-links">
+            <a class="nav-link active" onclick="showPage('home')">
+                <span>🏠</span>
+                <span>Home</span>
+            </a>
+            <a class="nav-link" onclick="">
+                <span>👥</span>
+                <span>Team</span>
+            </a>
+            <a class="nav-link" onclick="">
+                <span>📋</span>
+                <span>About</span>
+            </a>
+        </div>
+        <button class="menu-btn" id="menuBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
 
-        <!-- Main Content -->
-        <div class="main-content" id="mainContent">
-            <!-- Home Page -->
-            <div id="homePage">
-                <div class="hero-section">
-                    <div class="logo-container">
-                        <img src="https://cdn.discordapp.com/attachments/1367007738151964717/1411958575777054761/Picsart_25-08-27_18-59-17-276.png?ex=68e6ab25&is=68e559a5&hm=db7e4d10adc35517129b27e22a7f960606fdb7967f220ada2dd0f8fa2bf227c3&" alt="Fynex Logo" class="logo">
-                    </div>
-                    <div class="hero-content">
-                        <h1>Fynex Music Bot</h1>
-                        <p class="description">Fynex is a High quality music bot which comes with amazing commands and features for the best music experience on Discord!</p>
-                    </div>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">Total Servers</div>
-                        <div class="stat-value" id="servers">60</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Active Users</div>
-                        <div class="stat-value" id="users">19K</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Uptime</div>
-                        <div class="stat-value" id="uptime">10d</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">Ping</div>
-                        <div class="stat-value" id="ping">15ms</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Commands Section -->
-            <div id="commandsPage" style="display: none;">
-                <input type="text" class="search-bar" id="searchBar" placeholder="Search commands...">
-                <div id="commandsContainer"></div>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span style="color: #00c8ff; font-weight: 700;">Menu</span>
+            <button class="close-btn" id="closeBtn">✕</button>
+        </div>
+        <div class="sidebar-links">
+            <button class="sidebar-link" onclick="showPage('home'); closeSidebar();">🏠 Home</button>
+            <button class="sidebar-link" onclick="">👥 Team</button>
+            <button class="sidebar-link expandable" id="cmdToggle">📋 Commands ↓</button>
+            <div class="submenu" id="submenu">
+                <div class="submenu-item" onclick="showCommandCategory('music')">🎵 Music</div>
+                <div class="submenu-item" onclick="showCommandCategory('filter')">🎚️ Filter</div>
+                <div class="submenu-item" onclick="showCommandCategory('spotify')">🎧 Spotify</div>
+                <div class="submenu-item" onclick="showCommandCategory('playlist')">📝 Playlist</div>
+                <div class="submenu-item" onclick="showCommandCategory('config')">⚙️ Config</div>
+                <div class="submenu-item" onclick="showCommandCategory('favourite')">⭐ Favourite</div>
+                <div class="submenu-item" onclick="showCommandCategory('utility')">🔧 Utility</div>
+                <div class="submenu-item" onclick="showCommandCategory('premium')">💎 Premium</div>
+                <div class="submenu-item" onclick="showCommandCategory('info')">ℹ️ Info</div>
             </div>
         </div>
     </div>
 
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <div class="hero-section">
+                <div class="profile-card">
+                    <div class="logo-title-row">
+                        <div class="logo-container">
+                            <img src="https://cdn.discordapp.com/attachments/1367007738151964717/1411958575777054761/Picsart_25-08-27_18-59-17-276.png" alt="Fynex" class="logo">
+                        </div>
+                        <div>
+                            <h1>Fynex</h1>
+                            <p class="subtitle">A Music Bot</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="intro-card">
+                    <h2 class="intro-title">About Me</h2>
+                    <p class="description">Introducing Fynex, your next-generation Discord music bot. Transform your server into a musical hub with powerful audio filters, smart playlist controls, and smooth playback.</p>
+                    <p class="description">Fynex is built to be your all-in-one music companion for Discord with advanced audio features and customization options.</p>
+                </div>
+            </div>
+
+            <div class="features-section">
+                <h2 class="section-title">Features</h2>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-header">
+                            <div class="feature-icon">🎚️</div>
+                            <div class="feature-name">Inbuilt Filters</div>
+                        </div>
+                        <div class="feature-desc">Customize audio with various filters</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-header">
+                            <div class="feature-icon">🔇</div>
+                            <div class="feature-name">Ignore System</div>
+                        </div>
+                        <div class="feature-desc">Control what gets played in your server</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-header">
+                            <div class="feature-icon">📢</div>
+                            <div class="feature-name">Utility Commands</div>
+                        </div>
+                        <div class="feature-desc">Diverse utility commands for management</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-header">
+                            <div class="feature-icon">⚙️</div>
+                            <div class="feature-name">No Prefix System</div>
+                        </div>
+                        <div class="feature-desc">Seamless interaction without prefixes</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features-section">
+                <h2 class="section-title">Bot Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Servers</div>
+                        <div class="stat-value">60</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Active Users</div>
+                        <div class="stat-value">19K</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Uptime</div>
+                        <div class="stat-value">10d</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Ping</div>
+                        <div class="stat-value">15ms</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Commands Page -->
+        <div id="commands" class="page">
+            <input type="text" class="search-bar" id="searchInput" placeholder="Search commands...">
+            <h2 class="category-title" id="categoryTitle"></h2>
+            <div class="commands-grid" id="commandsList"></div>
+        </div>
+
+        <!-- All Commands Page -->
+        <div id="allcommands" class="page">
+            <input type="text" class="search-bar" id="searchAll" placeholder="Search commands...">
+            <div id="allCommandsList"></div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav" id="bottomNav">
+        <a class="bottom-link" onclick="showPage('home')">
+            <span class="bottom-icon">🏠</span>
+            <span>Home</span>
+        </a>
+        <a class="bottom-link" onclick="showAllCommands()">
+            <span class="bottom-icon">📋</span>
+            <span>Commands</span>
+        </a>
+        <a class="bottom-link">
+            <span class="bottom-icon">👥</span>
+            <span>Team</span>
+        </a>
+        <a class="bottom-link">
+            <span class="bottom-icon">📊</span>
+            <span>Reports</span>
+        </a>
+    </div>
+
+    <footer>
+        <p>Made by Mandeep ❤️</p>
+    </footer>
+
     <script>
-        const commands = {
+        const commandsData = {
             music: [
-                { name: '/play', description: 'Play a song from YouTube, Spotify, or other sources' },
-                { name: '/pause', description: 'Pause the currently playing song' },
-                { name: '/resume', description: 'Resume the paused song' },
-                { name: '/skip', description: 'Skip to the next song in queue' },
-                { name: '/stop', description: 'Stop playing and clear the queue' },
-                { name: '/queue', description: 'Display the current song queue' },
-                { name: '/nowplaying', description: 'Show currently playing song information' },
-                { name: '/volume', description: 'Adjust the playback volume (0-100)' },
-                { name: '/loop', description: 'Toggle loop mode for current song or queue' },
-                { name: '/shuffle', description: 'Shuffle the current queue' }
+                { name: '/play', description: 'Play a song' },
+                { name: '/pause', description: 'Pause the song' },
+                { name: '/skip', description: 'Skip to next' }
             ],
             filter: [
-                { name: '/bassboost', description: 'Apply bass boost effect to audio' },
-                { name: '/nightcore', description: 'Apply nightcore effect (speed up + pitch up)' },
-                { name: '/vaporwave', description: 'Apply vaporwave effect (slow down)' },
-                { name: '/8d', description: 'Enable 8D audio effect' },
-                { name: '/karaoke', description: 'Remove vocals for karaoke mode' },
-                { name: '/tremolo', description: 'Apply tremolo effect' },
-                { name: '/vibrato', description: 'Apply vibrato effect' },
-                { name: '/resetfilter', description: 'Remove all applied filters' }
+                { name: '/bassboost', description: 'Boost bass' },
+                { name: '/nightcore', description: 'Nightcore effect' }
             ],
             spotify: [
-                { name: '/spotify', description: 'Play songs directly from Spotify' },
-                { name: '/spotifyplaylist', description: 'Play entire Spotify playlist' },
-                { name: '/spotifyalbum', description: 'Play Spotify album' },
-                { name: '/spotifyartist', description: 'Play top tracks from Spotify artist' }
+                { name: '/spotify', description: 'Play from Spotify' }
             ],
             playlist: [
-                { name: '/playlist create', description: 'Create a new custom playlist' },
-                { name: '/playlist add', description: 'Add current song to playlist' },
-                { name: '/playlist remove', description: 'Remove song from playlist' },
-                { name: '/playlist play', description: 'Play your saved playlist' },
-                { name: '/playlist list', description: 'Show all your playlists' },
-                { name: '/playlist delete', description: 'Delete a playlist' }
+                { name: '/playlist create', description: 'Create playlist' }
             ],
             config: [
-                { name: '/setprefix', description: 'Change bot command prefix' },
-                { name: '/setdj', description: 'Set DJ role for music controls' },
-                { name: '/announce', description: 'Toggle song announcement messages' },
-                { name: '/247', description: 'Enable 24/7 mode (stay in voice channel)' },
-                { name: '/language', description: 'Change bot language' }
+                { name: '/setprefix', description: 'Change prefix' }
             ],
             favourite: [
-                { name: '/favorite add', description: 'Add current song to favorites' },
-                { name: '/favorite list', description: 'Show your favorite songs' },
-                { name: '/favorite play', description: 'Play your favorite songs' },
-                { name: '/favorite remove', description: 'Remove song from favorites' }
+                { name: '/favorite add', description: 'Add to favorites' }
             ],
             utility: [
-                { name: '/lyrics', description: 'Get lyrics of current or specified song' },
-                { name: '/seek', description: 'Jump to specific timestamp in song' },
-                { name: '/forward', description: 'Fast forward by specified seconds' },
-                { name: '/rewind', description: 'Rewind by specified seconds' },
-                { name: '/previous', description: 'Play previous song' },
-                { name: '/move', description: 'Move a song to different position in queue' }
+                { name: '/lyrics', description: 'Get lyrics' }
             ],
             premium: [
-                { name: '/premium status', description: 'Check your premium subscription status' },
-                { name: '/premium activate', description: 'Activate premium features' },
-                { name: '/premium features', description: 'View all premium features' }
+                { name: '/premium status', description: 'Check premium' }
             ],
             info: [
-                { name: '/help', description: 'Display help menu with all commands' },
-                { name: '/invite', description: 'Get bot invite link' },
-                { name: '/stats', description: 'Show bot statistics' },
-                { name: '/ping', description: 'Check bot latency' },
-                { name: '/support', description: 'Get support server invite link' }
+                { name: '/help', description: 'Get help' }
             ]
         };
 
+        const menuBtn = document.getElementById('menuBtn');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
-        const mainContent = document.getElementById('mainContent');
-        const categoryToggle = document.getElementById('categoryToggle');
+        const closeBtn = document.getElementById('closeBtn');
+        const cmdToggle = document.getElementById('cmdToggle');
         const submenu = document.getElementById('submenu');
-        const arrow = categoryToggle.querySelector('.arrow');
-        const backBtn = document.getElementById('backBtn');
-        const homePage = document.getElementById('homePage');
-        const commandsPage = document.getElementById('commandsPage');
-        const searchBar = document.getElementById('searchBar');
-        const commandsContainer = document.getElementById('commandsContainer');
-        const menuToggle = document.getElementById('menuToggle');
-        const inviteBtn = document.getElementById('inviteBtn');
+        const bottomNav = document.getElementById('bottomNav');
 
-        let currentView = 'home';
-
-        // Toggle sidebar with menu button
-        menuToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const isOpen = sidebar.classList.contains('show');
-            
-            if (isOpen) {
-                sidebar.classList.remove('show');
-                overlay.classList.remove('show');
-                menuToggle.classList.remove('hide');
-            } else {
-                sidebar.classList.add('show');
-                overlay.classList.add('show');
-                menuToggle.classList.add('hide');
-            }
+        menuBtn.addEventListener('click', () => {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+            bottomNav.classList.add('hidden');
         });
 
-        // Invite button
-        inviteBtn.addEventListener('click', () => {
-            window.open('https://discord.com/oauth2/authorize?client_id=1409862504405925980', '_blank');
-        });
+        closeBtn.addEventListener('click', closeSidebar);
+        overlay.addEventListener('click', closeSidebar);
 
-        // Toggle submenu
-        categoryToggle.addEventListener('click', () => {
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            bottomNav.classList.remove('hidden');
+        }
+
+        cmdToggle.addEventListener('click', () => {
+            cmdToggle.classList.toggle('expanded');
             submenu.classList.toggle('show');
-            arrow.classList.toggle('rotated');
         });
 
-        // Handle menu clicks
-        document.querySelectorAll('.menu-item[data-page]').forEach(item => {
-            item.addEventListener('click', () => {
-                const page = item.dataset.page;
-                if (page === 'home') {
-                    showHome();
-                } else if (page === 'all-commands') {
-                    showAllCommands();
-                }
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(page).classList.add('active');
+        }
+
+        function showCommandCategory(category) {
+            showPage('commands');
+            closeSidebar();
+            document.getElementById('categoryTitle').textContent = category.charAt(0).toUpperCase() + category.slice(1) + ' Commands';
+            displayCommands(commandsData[category]);
+        }
+
+        function displayCommands(commands) {
+            let html = '';
+            commands.forEach(cmd => {
+                html += `
+                    <div class="command-card">
+                        <div class="command-name">${cmd.name}</div>
+                        <div class="command-desc">${cmd.description}</div>
+                    </div>
+                `;
             });
-        });
-
-        // Handle submenu clicks
-        document.querySelectorAll('.submenu-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const category = item.dataset.category;
-                showCategory(category);
-            });
-        });
-
-        // Back button
-        backBtn.addEventListener('click', () => {
-            sidebar.classList.remove('show');
-            overlay.classList.remove('show');
-            menuToggle.classList.remove('hide');
-            showHome();
-        });
-
-        // Click outside sidebar
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('show');
-            overlay.classList.remove('show');
-            menuToggle.classList.remove('hide');
-        });
-
-        // Close sidebar when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!sidebar.contains(e.target) && !menuToggle.contains(e.target) && sidebar.classList.contains('show')) {
-                sidebar.classList.remove('show');
-                overlay.classList.remove('show');
-                menuToggle.classList.remove('hide');
-            }
-        });
-
-        // Search functionality
-        searchBar.addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            filterCommands(query);
-        });
-
-        function showHome() {
-            homePage.style.display = 'block';
-            commandsPage.style.display = 'none';
-            backBtn.classList.remove('show');
-            currentView = 'home';
-            overlay.classList.remove('show');
+            document.getElementById('commandsList').innerHTML = html;
         }
 
         function showAllCommands() {
-            homePage.style.display = 'none';
-            commandsPage.style.display = 'block';
-            backBtn.classList.add('show');
-            currentView = 'all-commands';
-            
+            showPage('allcommands');
             let html = '';
-            for (const [category, cmds] of Object.entries(commands)) {
-                html += `
-                    <div class="category-section">
-                        <h2 class="category-title">${capitalizeFirst(category)}</h2>
-                        <div class="commands-grid">
-                            ${cmds.map(cmd => `
-                                <div class="command-card">
-                                    <div class="command-name">${cmd.name}</div>
-                                    <div class="command-description">${cmd.description}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-            commandsContainer.innerHTML = html;
-            overlay.classList.remove('show');
-        }
-
-        function showCategory(category) {
-            homePage.style.display = 'none';
-            commandsPage.style.display = 'block';
-            backBtn.classList.add('show');
-            currentView = category;
-            
-            const cmds = commands[category];
-            let html = `
-                <div class="category-section">
-                    <h2 class="category-title">${capitalizeFirst(category)}</h2>
-                    <div class="commands-grid">
-                        ${cmds.map(cmd => `
-                            <div class="command-card">
-                                <div class="command-name">${cmd.name}</div>
-                                <div class="command-description">${cmd.description}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
-            commandsContainer.innerHTML = html;
-            overlay.classList.remove('show');
-        }
-
-        function filterCommands(query) {
-            if (!query) {
-                if (currentView === 'all-commands') {
-                    showAllCommands();
-                } else if (currentView !== 'home') {
-                    showCategory(currentView);
-                }
-                return;
-            }
-
-            let html = '';
-            let found = false;
-
-            for (const [category, cmds] of Object.entries(commands)) {
-                const filtered = cmds.filter(cmd => 
-                    cmd.name.toLowerCase().includes(query) || 
-                    cmd.description.toLowerCase().includes(query)
-                );
-
-                if (filtered.length > 0) {
-                    found = true;
+            Object.keys(commandsData).forEach(category => {
+                html += `<h3 style="color: #00c8ff; margin: 30px 0 15px 0;">${category.charAt(0).toUpperCase() + category.slice(1)}</h3>`;
+                html += '<div class="commands-grid">';
+                commandsData[category].forEach(cmd => {
                     html += `
-                        <div class="category-section">
-                            <h2 class="category-title">${capitalizeFirst(category)}</h2>
-                            <div class="commands-grid">
-                                ${filtered.map(cmd => `
-                                    <div class="command-card">
-                                        <div class="command-name">${cmd.name}</div>
-                                        <div class="command-description">${cmd.description}</div>
-                                    </div>
-                                `).join('')}
-                            </div>
+                        <div class="command-card">
+                            <div class="command-name">${cmd.name}</div>
+                            <div class="command-desc">${cmd.description}</div>
                         </div>
                     `;
-                }
-            }
-
-            if (!found) {
-                html = '<p style="text-align: center; color: #7080a0; margin-top: 50px;">No commands found</p>';
-            }
-
-            commandsContainer.innerHTML = html;
+                });
+                html += '</div>';
+            });
+            document.getElementById('allCommandsList').innerHTML = html;
         }
 
-        function capitalizeFirst(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-
-        // Animate stats on load
-        function animateValue(id, start, end, duration, suffix = '') {
-            const obj = document.getElementById(id);
-            const range = end - start;
-            const increment = end > start ? 1 : -1;
-            const stepTime = Math.abs(Math.floor(duration / range));
-            let current = start;
-
-            const timer = setInterval(() => {
-                current += increment;
-                obj.textContent = current.toLocaleString() + suffix;
-                if (current === end) {
-                    clearInterval(timer);
-                }
-            }, stepTime);
-        }
-
-        // Simulate real-time stats
-        window.addEventListener('load', () => {
-            animateValue('servers', 0, 60, 1000);
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const currentTitle = document.getElementById('categoryTitle').textContent;
+            const category = currentTitle.split(' ')[0].toLowerCase();
             
-            // For users, animate without K
-            const usersObj = document.getElementById('users');
-            let currentUsers = 0;
-            const targetUsers = 19;
-            const usersTimer = setInterval(() => {
-                currentUsers++;
-                usersObj.textContent = currentUsers + 'K';
-                if (currentUsers === targetUsers) {
-                    clearInterval(usersTimer);
-                }
-            }, 50);
+            const filtered = commandsData[category].filter(cmd =>
+                cmd.name.includes(query) || cmd.description.toLowerCase().includes(query)
+            );
+            displayCommands(filtered);
+        });
+
+        document.getElementById('searchAll').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            let html = '';
             
-            // For uptime
-            const uptimeObj = document.getElementById('uptime');
-            let currentUptime = 0;
-            const targetUptime = 10;
-            const uptimeTimer = setInterval(() => {
-                currentUptime++;
-                uptimeObj.textContent = currentUptime + 'd';
-                if (currentUptime === targetUptime) {
-                    clearInterval(uptimeTimer);
+            Object.keys(commandsData).forEach(category => {
+                const filtered = commandsData[category].filter(cmd =>
+                    cmd.name.includes(query) || cmd.description.toLowerCase().includes(query)
+                );
+                
+                if (filtered.length > 0) {
+                    html += `<h3 style="color: #00c8ff; margin: 30px 0 15px 0;">${category.charAt(0).toUpperCase() + category.slice(1)}</h3>`;
+                    html += '<div class="commands-grid">';
+                    filtered.forEach(cmd => {
+                        html += `
+                            <div class="command-card">
+                                <div class="command-name">${cmd.name}</div>
+                                <div class="command-desc">${cmd.description}</div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
                 }
-            }, 100);
+            });
             
-            animateValue('ping', 0, 15, 1000, 'ms');
+            document.getElementById('allCommandsList').innerHTML = html;
         });
     </script>
 </body>
